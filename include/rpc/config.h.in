@@ -17,6 +17,7 @@ using session_id_t = std::intptr_t;
 struct constants RPCLIB_FINAL {
     static RPCLIB_CONSTEXPR std::size_t DEFAULT_BUFFER_SIZE = @RPCLIB_DEFAULT_BUFFER_SIZE@;
     static RPCLIB_CONSTEXPR std::uint16_t DEFAULT_PORT = @RPCLIB_DEFAULT_PORT@;
+    static RPCLIB_CONSTEXPR const char DEFAULT_SOCK[] = "@RPCLIB_DEFAULT_SOCK@";
 };
 
 } /* rpc */

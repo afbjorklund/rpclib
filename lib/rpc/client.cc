@@ -18,7 +18,7 @@
 #include "rpc/detail/response.h"
 
 using namespace RPCLIB_ASIO;
-using RPCLIB_ASIO::ip::tcp;
+using RPCLIB_ASIO::local::stream_protocol;
 using namespace rpc::detail;
 
 namespace rpc {
@@ -27,43 +27,40 @@ static constexpr uint32_t default_buffer_size =
     rpc::constants::DEFAULT_BUFFER_SIZE;
 
 struct client::impl {
-    impl(client *parent, std::string const &addr, uint16_t port)
+    impl(client *parent, std::string const &addr)
         : parent_(parent),
           io_(),
           strand_(io_),
           call_idx_(0),
           addr_(addr),
-          port_(port),
           is_connected_(false),
           state_(client::connection_state::initial),
           writer_(std::make_shared<detail::async_writer>(
-              &io_, RPCLIB_ASIO::ip::tcp::socket(io_))),
+              &io_, RPCLIB_ASIO::local::stream_protocol::socket(io_))),
           timeout_(nonstd::nullopt),
           connection_ec_(nonstd::nullopt) {
         pac_.reserve_buffer(default_buffer_size);
     }
 
-    void do_connect(tcp::resolver::iterator endpoint_iterator) {
+    void do_connect(local::stream_protocol::endpoint endpoint) {
         LOG_INFO("Initiating connection.");
         connection_ec_ = nonstd::nullopt;
-        RPCLIB_ASIO::async_connect(
-            writer_->socket(), endpoint_iterator,
-            [this](std::error_code ec, tcp::resolver::iterator) {
-                if (!ec) {
+        try {
+            writer_->socket().connect(endpoint);
                     std::unique_lock<std::mutex> lock(mut_connection_finished_);
-                    LOG_INFO("Client connected to {}:{}", addr_, port_);
+                    LOG_INFO("Client connected to {}", addr_);
                     is_connected_ = true;
                     state_ = client::connection_state::connected;
                     conn_finished_.notify_all();
                     do_read();
-                } else {
+	} catch (clmdep_asio::system_error error) {
+            std::error_code ec = error.code();
                     std::unique_lock<std::mutex> lock(mut_connection_finished_);
                     LOG_ERROR("Error during connection: {}", ec);
                     state_ = client::connection_state::disconnected;
                     connection_ec_ = ec;
                     conn_finished_.notify_all();
-                }
-            });
+        }
     }
 
     void do_read() {
@@ -149,7 +146,6 @@ struct client::impl {
     std::atomic<int> call_idx_; /// The index of the last call made
     std::unordered_map<uint32_t, call_t> ongoing_calls_;
     std::string addr_;
-    uint16_t port_;
     RPCLIB_MSGPACK::unpacker pac_;
     std::atomic_bool is_connected_;
     std::condition_variable conn_finished_;
@@ -162,12 +158,10 @@ struct client::impl {
     RPCLIB_CREATE_LOG_CHANNEL(client)
 };
 
-client::client(std::string const &addr, uint16_t port)
-    : pimpl(new client::impl(this, addr, port)) {
-    tcp::resolver resolver(pimpl->io_);
-    auto endpoint_it =
-        resolver.resolve({pimpl->addr_, std::to_string(pimpl->port_)});
-    pimpl->do_connect(endpoint_it);
+client::client(std::string const &address)
+    : pimpl(new client::impl(this, address)) {
+    local::stream_protocol::endpoint endpoint(address);
+    pimpl->do_connect(endpoint);
     std::thread io_thread([this]() {
         RPCLIB_CREATE_LOG_CHANNEL(client)
         name_thread("client");
@@ -188,8 +182,8 @@ void client::wait_conn() {
                 lock, std::chrono::milliseconds(*timeout));
             if (result == std::cv_status::timeout) {
                 throw rpc::timeout(RPCLIB_FMT::format(
-                    "Timeout of {}ms while connecting to {}:{}", *get_timeout(),
-                    pimpl->addr_, pimpl->port_));
+                    "Timeout of {}ms while connecting to {}", *get_timeout(),
+                    pimpl->addr_));
             }
         } else {
             pimpl->conn_finished_.wait(lock);

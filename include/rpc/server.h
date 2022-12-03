@@ -27,12 +27,6 @@ class server_session;
 //! This class is not copyable, but moveable.
 class server {
 public:
-    //! \brief Constructs a server that listens on the localhost on the
-    //! specified port.
-    //!
-    //! \param port The port number to listen on.
-    explicit server(uint16_t port);
-
     //! \brief Move constructor. This is implemented by calling the
     //! move assignment operator.
     //!
@@ -44,8 +38,7 @@ public:
     //!
     //! \param address The address to bind to. This only works if oee of your
     //! network adapaters control the given address.
-    //! \param port The port number to listen on.
-    server(std::string const &address, uint16_t port);
+    server(std::string const &address);
 
     //! \brief Destructor.
     //!
@@ -121,10 +114,6 @@ public:
     //! \brief Stops the server.
     //! \note This should not be called from worker threads.
     void stop();
-
-    //! \brief Returns port
-    //! \note The port
-    unsigned short port() const;
 
     //! \brief Closes all sessions gracefully.
     void close_sessions();

@@ -31,8 +31,7 @@ public:
     //!
     //! \param addr The address of the server to connect to. This might be an
     //! IP address or a host name, too.
-    //! \param port The port on the server to connect to.
-    client(std::string const &addr, uint16_t port);
+    client(std::string const &addr);
 
     //! \cond DOXYGEN_SKIP
     client(client const &) = delete;

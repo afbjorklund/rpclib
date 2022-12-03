@@ -2,7 +2,7 @@
 #include <iostream>
 
 int main() {
-    rpc::server srv(rpc::constants::DEFAULT_PORT);
+    rpc::server srv(rpc::constants::DEFAULT_SOCK);
     std::cout << "registered on  port " << srv.port() << std::endl;
 
     srv.bind("echo", [](std::string const& s) {

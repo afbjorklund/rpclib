@@ -16,38 +16,20 @@
 #include "rpc/this_server.h"
 
 using namespace rpc::detail;
-using RPCLIB_ASIO::ip::tcp;
+using RPCLIB_ASIO::local::stream_protocol;
 using namespace RPCLIB_ASIO;
 
 namespace rpc {
 
 struct server::impl {
-    impl(server *parent, std::string const &address, uint16_t port)
+    impl(server *parent, std::string const &address)
         : parent_(parent),
           io_(),
           acceptor_(io_),
           socket_(io_),
           suppress_exceptions_(false) {
-        auto ep = tcp::endpoint(ip::address::from_string(address), port);
+        auto ep = local::stream_protocol::endpoint(address);
         acceptor_.open(ep.protocol());
-#ifndef _WIN32
-        acceptor_.set_option(tcp::acceptor::reuse_address(true));
-#endif // !_WIN32
-        acceptor_.bind(ep);
-        acceptor_.listen();
-    }
-
-    impl(server *parent, uint16_t port)
-        : parent_(parent),
-          io_(),
-          acceptor_(io_),
-          socket_(io_),
-          suppress_exceptions_(false) {
-        auto ep = tcp::endpoint(tcp::v4(), port);
-        acceptor_.open(ep.protocol());
-#ifndef _WIN32
-        acceptor_.set_option(tcp::acceptor::reuse_address(true));
-#endif // !_WIN32
         acceptor_.bind(ep);
         acceptor_.listen();
     }
@@ -56,8 +38,7 @@ struct server::impl {
         acceptor_.async_accept(socket_, [this](std::error_code ec) {
             if (!ec) {
                 auto ep = socket_.remote_endpoint();
-                LOG_INFO("Accepted connection from {}:{}", ep.address(),
-                         ep.port());
+                LOG_INFO("Accepted connection from {}", ep.address());
                 auto s = std::make_shared<server_session>(
                     parent_, &io_, std::move(socket_), parent_->disp_,
                     suppress_exceptions_);
@@ -93,12 +74,10 @@ struct server::impl {
         loop_workers_.join_all();
     }
 
-    unsigned short port() const { return acceptor_.local_endpoint().port(); }
-
     server *parent_;
     io_service io_;
-    ip::tcp::acceptor acceptor_;
-    ip::tcp::socket socket_;
+    local::stream_protocol::acceptor acceptor_;
+    local::stream_protocol::socket socket_;
     rpc::detail::thread_group loop_workers_;
     std::vector<std::shared_ptr<server_session>> sessions_;
     std::atomic_bool suppress_exceptions_;
@@ -108,19 +87,12 @@ struct server::impl {
 
 RPCLIB_CREATE_LOG_CHANNEL(server)
 
-server::server(uint16_t port)
-    : pimpl(new server::impl(this, port)),
-      disp_(std::make_shared<dispatcher>()) {
-    LOG_INFO("Created server on localhost:{}", port);
-    pimpl->start_accept();
-}
-
 server::server(server &&other) noexcept { *this = std::move(other); }
 
-server::server(std::string const &address, uint16_t port)
-    : pimpl(new server::impl(this, address, port)),
+server::server(std::string const &address)
+    : pimpl(new server::impl(this, address)),
       disp_(std::make_shared<dispatcher>()) {
-    LOG_INFO("Created server on address {}:{}", address, port);
+    LOG_INFO("Created server on address {}", address);
     pimpl->start_accept();
 }
 
@@ -156,8 +128,6 @@ void server::async_run(std::size_t worker_threads) {
 }
 
 void server::stop() { pimpl->stop(); }
-
-unsigned short server::port() const { return pimpl->port(); }
 
 void server::close_sessions() { pimpl->close_sessions(); }
 

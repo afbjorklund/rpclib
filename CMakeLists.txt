@@ -33,7 +33,8 @@ option(RPCLIB_MSVC_STATIC_RUNTIME
 #
 # Other configuration values
 #
-set(RPCLIB_DEFAULT_PORT 8080 
+set(RPCLIB_DEFAULT_PORT 8080)
+set(RPCLIB_DEFAULT_SOCK "/tmp/rpc.sock"
   CACHE STRING "Default port used for running tests and examples")
 set(RPCLIB_DEFAULT_BUFFER_SIZE "1024 << 10" 
   CACHE STRING "Default buffer size")
