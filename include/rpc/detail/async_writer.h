@@ -21,13 +21,21 @@ class async_writer : public std::enable_shared_from_this<async_writer> {
 public:
     async_writer(RPCLIB_ASIO::io_service *io,
                  RPCLIB_ASIO::ip::tcp::socket socket)
+#if ASIO_VERSION < 101100 // 1.11.0
         : socket_(std::move(socket)), write_strand_(*io), exit_(false) {}
+#else
+        : socket_(std::move(socket)), write_strand_(io->get_executor()), exit_(false) {}
+#endif
 
     void close() {
         exit_ = true;
 
         auto self = shared_from_this();
+#if ASIO_VERSION < 101100 // 1.11.0
         write_strand_.post([this, self]() {
+#else
+        asio::post(write_strand_, [this, self]() {
+#endif
             LOG_INFO("Closing socket");
             std::error_code e;
             socket_.shutdown(
@@ -54,7 +62,11 @@ public:
         // since it will still be in the queue physically until then.
         RPCLIB_ASIO::async_write(
             socket_, RPCLIB_ASIO::buffer(item.data(), item.size()),
+#if ASIO_VERSION < 101100 // 1.11.0
             write_strand_.wrap(
+#else
+            asio::bind_executor(write_strand_,
+#endif
                 [this, self](std::error_code ec, std::size_t transferred) {
                     (void)transferred;
                     if (!ec) {
@@ -89,13 +101,21 @@ protected:
         return std::static_pointer_cast<Derived>(shared_from_this());
     }
 
+#if ASIO_VERSION < 101100 // 1.11.0
     RPCLIB_ASIO::strand& write_strand() {
+#else
+    RPCLIB_ASIO::strand<asio::io_context::executor_type>& write_strand() {
+#endif
         return write_strand_;
     }
 
 private:
     RPCLIB_ASIO::ip::tcp::socket socket_;
+#if ASIO_VERSION < 101100 // 1.11.0
     RPCLIB_ASIO::strand write_strand_;
+#else
+    RPCLIB_ASIO::strand<asio::io_context::executor_type> write_strand_;
+#endif
     std::atomic_bool exit_{false};
     std::deque<RPCLIB_MSGPACK::sbuffer> write_queue_;
     RPCLIB_CREATE_LOG_CHANNEL(async_writer)

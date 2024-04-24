@@ -35,7 +35,11 @@ private:
 private:
     server* parent_;
     RPCLIB_ASIO::io_service *io_;
+#if ASIO_VERSION < 101100 // 1.11.0
     RPCLIB_ASIO::strand read_strand_;
+#else
+    RPCLIB_ASIO::strand<asio::io_context::executor_type> read_strand_;
+#endif
     std::shared_ptr<dispatcher> disp_;
     RPCLIB_MSGPACK::unpacker pac_;
     RPCLIB_MSGPACK::sbuffer output_buf_;

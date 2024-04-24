@@ -21,7 +21,11 @@ server_session::server_session(server *srv, RPCLIB_ASIO::io_service *io,
     : async_writer(io, std::move(socket)),
       parent_(srv),
       io_(io),
+#if ASIO_VERSION < 101100 // 1.11.0
       read_strand_(*io),
+#else
+      read_strand_(io->get_executor()),
+#endif
       disp_(disp),
       pac_(),
       suppress_exceptions_(suppress_exceptions) {
@@ -36,7 +40,11 @@ void server_session::close() {
     async_writer::close();
 
     auto self(shared_from_base<server_session>());
+#if ASIO_VERSION < 101100 // 1.11.0
     write_strand().post([this, self]() {
+#else
+    asio::post(write_strand(), [this, self]() {
+#endif
         parent_->close_session(self);
     });
 }
@@ -48,7 +56,11 @@ void server_session::do_read() {
         RPCLIB_ASIO::buffer(pac_.buffer(), default_buffer_size),
         // I don't think max_read_bytes needs to be captured explicitly
         // (since it's constexpr), but MSVC insists.
+#if ASIO_VERSION < 101100 // 1.11.0
         read_strand_.wrap([this, self, max_read_bytes](std::error_code ec,
+#else
+        asio::bind_executor(read_strand_, [this, self, max_read_bytes](std::error_code ec,
+#endif
                                                        std::size_t length) {
             if (is_closed()) { return; }
             if (!ec) {
@@ -93,10 +105,18 @@ void server_session::do_read() {
                         if (!resp.is_empty()) {
 #ifdef _MSC_VER
                             // doesn't compile otherwise.
+#if ASIO_VERSION < 101100 // 1.11.0
                             write_strand().post(
+#else
+                            asio::post(write_strand(),
+#endif
                                 [=]() { write(resp.get_data()); });
 #else
+#if ASIO_VERSION < 101100 // 1.11.0
                             write_strand().post(
+#else
+                            asio::post(write_strand(),
+#endif
                                 [this, self, resp, z]() { write(resp.get_data()); });
 #endif
                         }
@@ -105,14 +125,22 @@ void server_session::do_read() {
                             LOG_WARN("Session exit requested from a handler.");
                             // posting through the strand so this comes after
                             // the previous write
+#if ASIO_VERSION < 101100 // 1.11.0
                             write_strand().post([this]() { close(); });
+#else
+                            asio::post(write_strand(), [this]() { close(); });
+#endif
                         }
 
                         if (this_server().stopping()) {
                             LOG_WARN("Server exit requested from a handler.");
                             // posting through the strand so this comes after
                             // the previous write
+#if ASIO_VERSION < 101100 // 1.11.0
                             write_strand().post(
+#else
+                            asio::post(write_strand(),
+#endif
                                 [this]() { parent_->close_sessions(); });
                         }
                     });

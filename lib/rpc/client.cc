@@ -30,7 +30,11 @@ struct client::impl {
     impl(client *parent, std::string const &addr, uint16_t port)
         : parent_(parent),
           io_(),
+#if ASIO_VERSION < 101100 // 1.11.0
           strand_(io_),
+#else
+          strand_(io_.get_executor()),
+#endif
           call_idx_(0),
           addr_(addr),
           port_(port),
@@ -95,7 +99,11 @@ struct client::impl {
                             std::get<1>(current_call)
                                 .set_exception(std::current_exception());
                         }
+#if ASIO_VERSION < 101100 // 1.11.0
                         strand_.post(
+#else
+                        asio::post(strand_,
+#endif
                             [this, id]() { ongoing_calls_.erase(id); });
                     }
 
@@ -145,7 +153,11 @@ struct client::impl {
 
     client *parent_;
     RPCLIB_ASIO::io_service io_;
+#if ASIO_VERSION < 101100 // 1.11.0
     RPCLIB_ASIO::strand strand_;
+#else
+    RPCLIB_ASIO::strand<asio::io_context::executor_type> strand_;
+#endif
     std::atomic<int> call_idx_; /// The index of the last call made
     std::unordered_map<uint32_t, call_t> ongoing_calls_;
     std::string addr_;
@@ -202,7 +214,11 @@ int client::get_next_call_idx() { return ++(pimpl->call_idx_); }
 void client::post(std::shared_ptr<RPCLIB_MSGPACK::sbuffer> buffer, int idx,
                   std::string const &func_name,
                   std::shared_ptr<rsp_promise> p) {
+#if ASIO_VERSION < 101100 // 1.11.0
     pimpl->strand_.post([=]() {
+#else
+    asio::post(pimpl->strand_, [=]() {
+#endif
         pimpl->ongoing_calls_.insert(
             std::make_pair(idx, std::make_pair(func_name, std::move(*p))));
         pimpl->write(std::move(*buffer));
@@ -210,7 +226,11 @@ void client::post(std::shared_ptr<RPCLIB_MSGPACK::sbuffer> buffer, int idx,
 }
 
 void client::post(RPCLIB_MSGPACK::sbuffer *buffer) {
+#if ASIO_VERSION < 101100 // 1.11.0
     pimpl->strand_.post([=]() {
+#else
+    asio::post(pimpl->strand_, [=]() {
+#endif
         pimpl->write(std::move(*buffer));
         delete buffer;
     });
