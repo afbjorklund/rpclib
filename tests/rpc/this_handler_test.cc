@@ -36,7 +36,7 @@ TEST_F(this_handler_test, set_error) {
         c.call("errfunc");
         FAIL() << "There was no exception thrown.";
     } catch (rpc::rpc_error &e) {
-        auto err = e.get_error().as<std::string>();
+        auto err = e.get_error().get().as<std::string>();
         EXPECT_TRUE(str_match(err, ".*?Imma let you finish, but.*"));
     }
 }
@@ -57,7 +57,7 @@ TEST_F(this_handler_test, error_obj) {
         c.call("customerr");
         FAIL() << "There was no exception thrown.";
     } catch (rpc::rpc_error &e) {
-        auto err_received = e.get_error().as<std::tuple<int, std::string>>();
+        auto err_received = e.get_error().get().as<std::tuple<int, std::string>>();
         EXPECT_EQ(err_received, err);
     }
 }
@@ -73,9 +73,9 @@ TEST_F(this_handler_test, set_special_response) {
     s.async_run();
 
     rpc::client c("127.0.0.1", test_port);
-    EXPECT_EQ(c.call("spec_func", false).as<int>(), 5);
-    EXPECT_EQ(c.call("spec_func", true).as<std::string>(), text);
-    EXPECT_THROW(c.call("spec_func", true).as<int>(), RPCLIB_MSGPACK::type_error);
+    EXPECT_EQ(c.call("spec_func", false).get().as<int>(), 5);
+    EXPECT_EQ(c.call("spec_func", true).get().as<std::string>(), text);
+    EXPECT_THROW(c.call("spec_func", true).get().as<int>(), RPCLIB_MSGPACK::type_error);
 }
 
 TEST_F(this_handler_test, disable_response) {

@@ -108,7 +108,7 @@ TEST_F(server_error_handling, suppress_right_msg) {
         FAIL() << "There was no exception thrown.";
     } catch (rpc::rpc_error &e) {
         EXPECT_STREQ(e.what(), "rpc::rpc_error during call");
-        auto err = e.get_error().as<std::string>();
+        auto err = e.get_error().get().as<std::string>();
         EXPECT_TRUE(str_match(err, ".*?I'm blue.*"));
     }
 
@@ -117,7 +117,7 @@ TEST_F(server_error_handling, suppress_right_msg) {
         FAIL() << "There was no exception thrown.";
     } catch (rpc::rpc_error &e) {
         EXPECT_FALSE(str_match(e.what(), ".*?Am I evil.*"));
-        auto err = e.get_error().as<std::string>();
+        auto err = e.get_error().get().as<std::string>();
         EXPECT_TRUE(str_match(err, ".*?not derived from std::exception.*"));
     }
 }
@@ -129,7 +129,7 @@ TEST_F(server_error_handling, no_such_method_right_msg) {
         c.call("green");
         FAIL() << "There was no exception thrown.";
     } catch (rpc::rpc_error &e) {
-        auto err = e.get_error().as<std::string>();
+        auto err = e.get_error().get().as<std::string>();
         EXPECT_TRUE(str_match(err, ".*?could not find.*"));
     }
 }
@@ -141,7 +141,7 @@ TEST_F(server_error_handling, wrong_arg_count_void_zeroarg) {
         c.call("blue", 1);
         FAIL() << "There was no exception thrown.";
     } catch (rpc::rpc_error &e) {
-        auto err = e.get_error().as<std::string>();
+        auto err = e.get_error().get().as<std::string>();
         EXPECT_TRUE(str_match(err, ".*?invalid number of arguments.*"));
     }
 }
@@ -161,7 +161,7 @@ protected:
 
 TEST_F(dispatch_unicode, narrow_unicode) {
     rpc::client c("127.0.0.1", test_port);
-    EXPECT_EQ(str_utf8, c.call("utf", str_utf8).as<std::string>());
+    EXPECT_EQ(str_utf8, c.call("utf", str_utf8).get().as<std::string>());
 }
 
 TEST(server_misc, single_param_ctor) {

@@ -54,8 +54,8 @@ TEST_F(server_session_test, connection_closed_properly) {
 
 TEST_F(server_session_test, session_id_unique) {
     rpc::client c2("localhost", rpc::constants::DEFAULT_PORT);
-    auto sid1 = c.call("get_sid").as<rpc::session_id_t>();
-    auto sid2 = c2.call("get_sid").as<rpc::session_id_t>();
+    auto sid1 = c.call("get_sid").get().as<rpc::session_id_t>();
+    auto sid2 = c2.call("get_sid").get().as<rpc::session_id_t>();
     EXPECT_NE(sid1, sid2);
 }
 

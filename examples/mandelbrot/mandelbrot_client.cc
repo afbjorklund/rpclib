@@ -14,14 +14,14 @@ int main() {
     auto result_obj = c.async_call("get_mandelbrot", width, height);
 
     std::cout << "Calling get_time synchronically" << std::endl;
-    auto current_time = c.call("get_time").as<std::string>();
+    auto current_time = c.call("get_time").get().as<std::string>();
     std::cout << "Current time: " << current_time << std::endl;
 
     sf::Image image;
     image.create(width, height, sf::Color::Black);
 
     std::cout << "Waiting for get_mandelbrot result" << std::endl;
-    auto result = result_obj.get().as<pixel_data>();
+    auto result = result_obj.get().get().as<pixel_data>();
     std::cout << "Got mandelbrot data, displaying..." << std::endl;
 
     for (size_t y = 0; y < height; ++y) {
