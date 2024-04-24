@@ -256,10 +256,16 @@ if(NOT MSVC)  # Don't install pkg-config files when building with MSVC
   set(includedir "${CMAKE_INSTALL_PREFIX}/include")
   set(rpclib_version ${PROJECT_VERSION})
   set(rpclib_library ${PROJECT_NAME})
-  get_target_property(rpclib_cflags ${PROJECT_NAME} COMPILE_OPTIONS)
-  string(REPLACE ";" " " rpclib_cflags "${rpclib_cflags}") # Convert list to string
-  get_target_property(rpclib_libs ${PROJECT_NAME} LINK_OPTIONS)
-  string(REPLACE ";" " " rpclib_libs "${rpclib_libs}") # Convert list to string
+  #get_target_property(rpclib_cflags ${PROJECT_NAME} COMPILE_OPTIONS)
+  #string(REPLACE ";" " " rpclib_cflags "${rpclib_cflags}") # Convert list to string
+  get_target_property(rpclib_cflags ${PROJECT_NAME} COMPILE_DEFINITIONS)
+  string(REGEX REPLACE ";+" ";" rpclib_cflags ";${rpclib_cflags}") # Remove empty
+  string(REPLACE ";" " -D" rpclib_cflags "${rpclib_cflags}") # Convert list to flags
+  #get_target_property(rpclib_libs ${PROJECT_NAME} LINK_OPTIONS)
+  #string(REPLACE ";" " " rpclib_libs "${rpclib_libs}") # Convert list to string
+  get_target_property(rpclib_libs ${PROJECT_NAME} LINK_LIBRARIES)
+  string(REGEX REPLACE ";+" ";" rpclib_libs ";${rpclib_libs}") # Remove empty
+  string(REPLACE ";" " -l" rpclib_libs "${rpclib_libs}") # Convert list to flags
 
   configure_file(rpclib.pc.in "${CMAKE_CURRENT_BINARY_DIR}/rpclib.pc" @ONLY)
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/rpclib.pc" DESTINATION "${libdir}/pkgconfig")
