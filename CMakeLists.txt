@@ -38,9 +38,10 @@ set(RPCLIB_DEFAULT_PORT 8080
 set(RPCLIB_DEFAULT_BUFFER_SIZE "1024 << 10" 
   CACHE STRING "Default buffer size")
 set(RPCLIB_CXX_STANDARD 11 CACHE STRING 
-  "C++ version used to build rpclib (Currently: Only 11 and 14 supported)")
+  "C++ version used to build rpclib (Currently: Only 11, 14, and 17 supported)")
 
-if(NOT ${RPCLIB_CXX_STANDARD} EQUAL 14 AND 
+if(NOT ${RPCLIB_CXX_STANDARD} EQUAL 17 AND
+   NOT ${RPCLIB_CXX_STANDARD} EQUAL 14 AND
    NOT ${RPCLIB_CXX_STANDARD} EQUAL 11)
   message(fatal_error "Unsupported C++ standard: ${RPCLIB_CXX_STANDARD}")
 endif()
