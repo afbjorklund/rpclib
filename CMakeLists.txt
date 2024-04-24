@@ -40,13 +40,6 @@ set(RPCLIB_DEFAULT_BUFFER_SIZE "1024 << 10"
 set(RPCLIB_CXX_STANDARD 11 CACHE STRING 
   "C++ version used to build rpclib (Currently: Only 11 and 14 supported)")
 
-if(RPCLIB_GENERATE_COMPDB)
-  set(CMAKE_EXPORT_COMPILE_COMMANDS "ON") # for YCM
-  add_custom_command(PROJECT_NAME ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E
-    copy ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_BINARY_DIR}/../compile_commands.json)
-endif()
-
 if(NOT ${RPCLIB_CXX_STANDARD} EQUAL 14 AND 
    NOT ${RPCLIB_CXX_STANDARD} EQUAL 11)
   message(fatal_error "Unsupported C++ standard: ${RPCLIB_CXX_STANDARD}")
@@ -104,6 +97,13 @@ add_library(${PROJECT_NAME}
   ${DEP_SOURCES}
   ${DEP_HEADERS}
   ${RPCLIB_HEADERS})
+
+if(RPCLIB_GENERATE_COMPDB)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS "ON") # for YCM
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E
+    copy ${CMAKE_BINARY_DIR}/compile_commands.json ${CMAKE_BINARY_DIR}/../compile_commands.json)
+endif()
 
 # Perform steps and checks required for MSVC support
 rpclib_msvc_support()
