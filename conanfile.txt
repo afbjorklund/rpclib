@@ -1,5 +1,13 @@
 [requires]
-cmake_installer/1.0@conan/stable
+asio/[>=1.10.6]
+msgpack-cxx/[>=2.1.5]
+fmt/[>=2.0.0]
 
 [generators]
-virtualenv
+CMakeDeps
+CMakeToolchain
+[layout]
+cmake_layout
+
+[options]
+msgpack-cxx*:use_boost=False
