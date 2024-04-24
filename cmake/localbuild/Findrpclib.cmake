@@ -44,9 +44,10 @@ endif()
 
 set(RPCLIB_COMPILE_DEFINITIONS
     "ASIO_STANDALONE"
-    "RPCLIB_ASIO=clmdep_asio"
-    "RPCLIB_FMT=clmdep_fmt"
-    "RPCLIB_MSGPACK=clmdep_msgpack"
+    "RPCLIB_ASIO=asio"
+    "RPCLIB_FMT=fmt"
+    "MSGPACK_NO_BOOST"
+    "RPCLIB_MSGPACK=msgpack"
     "RPCLIB_CXX_STANDARD=14"
     "RPCLIB_DEFAULT_PORT=${RPCLIB_DEFAULT_PORT}"
 )

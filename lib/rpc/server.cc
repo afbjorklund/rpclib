@@ -7,7 +7,7 @@
 #include <thread>
 
 #include "asio.hpp"
-#include "format.h"
+#include "fmt/format.h"
 
 #include "rpc/detail/dev_utils.h"
 #include "rpc/detail/log.h"

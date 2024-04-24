@@ -86,9 +86,8 @@ file(GLOB_RECURSE DEP_HEADERS
   ${RPCLIB_DEPENDENCIES}/include/*.h
   ${RPCLIB_DEP_LIBRARIDEPENDENCIES}/include/*.hpp)
 
-set(DEP_SOURCES
-  ${RPCLIB_DEPENDENCIES}/src/format.cc
-  ${RPCLIB_DEPENDENCIES}/src/posix.cc)
+set(DEP_LIBRARIES
+   fmt)
 
 add_library(${PROJECT_NAME}
   lib/rpc/dispatcher.cc
@@ -145,11 +144,12 @@ target_compile_definitions(${PROJECT_NAME}
     "${RPCLIB_COMPILE_DEFINITIONS}"
     "${RPCLIB_ARCH_DEF}"
     "ASIO_STANDALONE"
-    "RPCLIB_ASIO=clmdep_asio"
-    "RPCLIB_FMT=clmdep_fmt"
+    "RPCLIB_ASIO=asio"
+    "RPCLIB_FMT=fmt"
   PUBLIC
     "${RPCLIB_OS_DEF}"
-    "RPCLIB_MSGPACK=clmdep_msgpack"
+    "MSGPACK_NO_BOOST"
+    "RPCLIB_MSGPACK=msgpack"
   )
 
 if(RPCLIB_ENABLE_LOGGING)
@@ -166,7 +166,7 @@ if(RPCLIB_COMPILE_DEFINITIONS)
     COMPILE_DEFINITIONS "${RPCLIB_COMPILE_DEFINITIONS}")
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${RPCLIB_DEP_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${DEP_LIBRARIES} ${RPCLIB_DEP_LIBRARIES})
 if (WIN32)
   target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
 endif()
@@ -255,8 +255,11 @@ if(NOT MSVC)  # Don't install pkg-config files when building with MSVC
   set(libdir "${CMAKE_INSTALL_PREFIX}/lib")
   set(includedir "${CMAKE_INSTALL_PREFIX}/include")
   set(rpclib_version ${PROJECT_VERSION})
+  set(rpclib_library ${PROJECT_NAME})
   get_target_property(rpclib_cflags ${PROJECT_NAME} COMPILE_OPTIONS)
   string(REPLACE ";" " " rpclib_cflags "${rpclib_cflags}") # Convert list to string
+  get_target_property(rpclib_libs ${PROJECT_NAME} LINK_OPTIONS)
+  string(REPLACE ";" " " rpclib_libs "${rpclib_libs}") # Convert list to string
 
   configure_file(rpclib.pc.in "${CMAKE_CURRENT_BINARY_DIR}/rpclib.pc" @ONLY)
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/rpclib.pc" DESTINATION "${libdir}/pkgconfig")

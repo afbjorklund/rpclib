@@ -28,7 +28,7 @@ struct constants RPCLIB_FINAL {
 // macro has to be changed to the namespace name that this new
 // msgpack uses (usually "msgpack", unless it is changed manually)
 #ifndef RPCLIB_MSGPACK
-#define RPCLIB_MSGPACK clmdep_msgpack
+#define RPCLIB_MSGPACK msgpack
 #endif /* ifndef RPCLIB_MSGPACK */
 
 #ifndef RPCLIB_CXX_STANDARD

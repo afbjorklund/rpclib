@@ -7,8 +7,8 @@ def current_path():
 
 flags = [
     '-Wall',
-    '-DRPCLIB_ASIO=clmdep_asio',
-    '-DRPCLIB_FMT=clmdep_fmt',
+    '-DRPCLIB_ASIO=asio',
+    '-DRPCLIB_FMT=fmt',
     '-Wextra',
     '-Wno-long-long',
     '-Wno-variadic-macros',
