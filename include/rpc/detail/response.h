@@ -5,7 +5,7 @@
 
 #include "rpc/detail/log.h"
 #include "rpc/detail/make_unique.h"
-#include "msgpack.hpp"
+#include "rpc/msgpack.hpp"
 
 namespace rpc {
 namespace detail {

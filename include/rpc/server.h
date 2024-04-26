@@ -4,7 +4,7 @@
 #define SERVER_H_S0HB5KXY
 
 #include "rpc/config.h"
-#include "msgpack.hpp"
+#include "rpc/msgpack.hpp"
 #include "rpc/dispatcher.h"
 
 #include "rpc/detail/pimpl.h"
