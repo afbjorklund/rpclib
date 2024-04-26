@@ -1,5 +1,5 @@
 #include "rpc/dispatcher.h"
-#include "fmt/format.h"
+#include "rpc/fmt.hpp"
 #include "rpc/detail/client_error.h"
 #include "rpc/this_handler.h"
 

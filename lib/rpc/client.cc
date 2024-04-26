@@ -11,7 +11,7 @@
 #include <unordered_map>
 
 #include "asio.hpp"
-#include "fmt/format.h"
+#include "rpc/fmt.hpp"
 
 #include "rpc/detail/async_writer.h"
 #include "rpc/detail/dev_utils.h"

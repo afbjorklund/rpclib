@@ -5,7 +5,7 @@
 
 #ifdef RPCLIB_ENABLE_LOGGING
 
-#include "fmt/format.h"
+#include "rpc/fmt.hpp"
 #include <chrono>
 #include <cstdlib>
 #include <iomanip>

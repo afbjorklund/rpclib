@@ -1,5 +1,5 @@
 #include "rpc/rpc_error.h"
-#include "fmt/format.h"
+#include "rpc/fmt.hpp"
 
 namespace rpc {
 

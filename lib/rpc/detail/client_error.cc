@@ -1,4 +1,4 @@
-#include "fmt/format.h"
+#include "rpc/fmt.hpp"
 
 #include "rpc/detail/client_error.h"
 
