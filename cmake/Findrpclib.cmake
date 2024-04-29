@@ -82,6 +82,7 @@ set(RPCLIB_COMPILE_DEFINITIONS
     "RPCLIB_FMT=fmt"
     "MSGPACK_NO_BOOST"
     "RPCLIB_MSGPACK=msgpack"
+    "RPCLIB_CXX_STANDARD=${CMAKE_CXX_STANDARD}"
 )
 
 include(FindPackageHandleStandardArgs)
