@@ -75,15 +75,34 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     set(RPCLIB_EXTRA_FLAGS_DEBUG "/Zi")
 endif()
 
-set(RPCLIB_COMPILE_DEFINITIONS
-    "ASIO_STANDALONE"
-    "RPCLIB_ASIO=asio"
-    "FMT_HEADER_ONLY"
-    "RPCLIB_FMT=fmt"
-    "MSGPACK_NO_BOOST"
-    "RPCLIB_MSGPACK=msgpack"
-    "RPCLIB_CXX_STANDARD=${CMAKE_CXX_STANDARD}"
-)
+if(RPCLIB_INCLUDE_DIR)
+    file(READ
+        "${RPCLIB_INCLUDE_DIR}/rpc/config.h"
+	RPCLIB_CONFIG_CONTENTS)
+    string(REGEX REPLACE
+	".*#define RPCLIB_MSGPACK ([a-z_]+).*" "\\1"
+	RPCLIB_MSGPACK "${RPCLIB_CONFIG_CONTENTS}")
+endif()
+
+if (${RPCLIB_MSGPACK} MATCHES "clmdep_msgpack")
+    set(RPCLIB_COMPILE_DEFINITIONS
+        "ASIO_STANDALONE"
+        "RPCLIB_ASIO=clmdep_asio"
+        "RPCLIB_FMT=clmdep_fmt"
+        "RPCLIB_MSGPACK=clmdep_msgpack"
+        "RPCLIB_CXX_STANDARD=${CMAKE_CXX_STANDARD}"
+    )
+else()
+    set(RPCLIB_COMPILE_DEFINITIONS
+        "ASIO_STANDALONE"
+        "RPCLIB_ASIO=asio"
+        "FMT_HEADER_ONLY"
+        "RPCLIB_FMT=fmt"
+        "MSGPACK_NO_BOOST"
+        "RPCLIB_MSGPACK=msgpack"
+        "RPCLIB_CXX_STANDARD=${CMAKE_CXX_STANDARD}"
+    )
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(rpclib
