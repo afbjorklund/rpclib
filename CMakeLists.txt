@@ -80,9 +80,6 @@ file(GLOB_RECURSE DEP_HEADERS
   ${RPCLIB_DEPENDENCIES}/include/*.h
   ${RPCLIB_DEP_LIBRARIDEPENDENCIES}/include/*.hpp)
 
-set(DEP_LIBRARIES
-   fmt)
-
 add_library(${PROJECT_NAME}
   lib/rpc/dispatcher.cc
   lib/rpc/server.cc
@@ -146,6 +143,7 @@ target_compile_definitions(${PROJECT_NAME}
     "${RPCLIB_ARCH_DEF}"
     "ASIO_STANDALONE"
     "RPCLIB_ASIO=asio"
+    "FMT_HEADER_ONLY"
     "RPCLIB_FMT=fmt"
   PUBLIC
     "${RPCLIB_OS_DEF}"

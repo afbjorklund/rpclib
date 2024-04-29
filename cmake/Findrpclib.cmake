@@ -49,11 +49,6 @@ find_library(RPCLIB_LIB
     PATHS ${FIND_RPCLIB_PATHS})
 set(RPCLIB_LIBS ${RPCLIB_LIB})
 
-find_library(FMT_LIB
-    NAMES fmt
-    PATHS ${FIND_RPCLIB_PATHS})
-list(APPEND RPCLIB_LIBS ${FMT_LIB})
-
 if(RPCLIB_INCLUDE_DIR)
     file(READ
         "${RPCLIB_INCLUDE_DIR}/rpc/version.h"
@@ -83,6 +78,7 @@ endif()
 set(RPCLIB_COMPILE_DEFINITIONS
     "ASIO_STANDALONE"
     "RPCLIB_ASIO=asio"
+    "FMT_HEADER_ONLY"
     "RPCLIB_FMT=fmt"
     "MSGPACK_NO_BOOST"
     "RPCLIB_MSGPACK=msgpack"
