@@ -44,10 +44,9 @@ find_path(RPCLIB_INCLUDE_DIR
     NAMES "rpc/version.h"
     PATHS ${FIND_RPCLIB_PATHS})
 
-find_library(RPCLIB_LIB
+find_library(RPCLIB_LIBS
     NAMES librpc rpclib rpc
     PATHS ${FIND_RPCLIB_PATHS})
-set(RPCLIB_LIBS ${RPCLIB_LIB})
 
 if(RPCLIB_INCLUDE_DIR)
     file(READ
